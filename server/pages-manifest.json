@@ -1,8 +1,8 @@
 {
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
-  "/": "pages/index.html",
   "/play": "pages/play.html",
+  "/": "pages/index.html",
   "/previous-games": "pages/previous-games.html",
   "/result": "pages/result.html",
   "/_document": "pages/_document.js",
