@@ -16,7 +16,7 @@ import { StorageData } from '../util/hooks/StorageData';
 const cols = ['text-red-500', 'text-yellow-500', 'text-emerald-500']
 
 const Result = () => {
-    const { res, setRes, difficulty } = useStore()
+    const { res, setRes, difficulty, isSaved } = useStore()
     const [selectedSpellings, setSelectedSpellings] = useState(new Array(res.length).fill(false))
     const [dat, setData] = useState<ResultData>({
         avgPct: 0,
@@ -55,6 +55,7 @@ const Result = () => {
         })
 
     }, [])
+    const router = useRouter()
     const [storage, setStorage] = useLocalStorage<StorageData[]>('results', [])
     useEffect(() => {
         if (res.length === 0) {
@@ -67,14 +68,13 @@ const Result = () => {
                 date: new Date().getTime(),
                 difficulty
             })
-            if (dat.words.length > 0) {
+            if (dat.words.length > 0 && !isSaved) {
                 setStorage(nStorage)
             }
         }
     }, [dat])
     const allCorrectSpellings = selectedSpellings.every((el) => el !== true)
     const q = selectedSpellings.filter((el) => el === true).length
-    const router = useRouter()
     return (
         <>
             <Header />
@@ -105,44 +105,54 @@ const Result = () => {
 
             </div>
             <div className='font-inter text-2xl md:text-5xl w-1/2 mx-auto flex flex-col items-center justify-start'>
-                <div className='flex flex-col'>
+                <div className='flex flex-col my-4'>
 
                     <div className='flex gap-x-2 items-center justify-center'>
                         <div className={`${clsx([cols[0] && avgPct < 50, cols[1] && avgPct >= 50, cols[2] && avgPct >= 70])}`}>{avgPct.toFixed(1)}%</div>
                     </div>
                     <div
-                        className='font-bold bg-gradient-to-bl from-orange-500 to-pink-500 bg-clip-text text-transparent '
+                        className=' my-2 font-bold bg-gradient-to-bl from-orange-500 to-pink-500 bg-clip-text text-transparent '
                     >
 
                         ACCURACY</div>
                 </div>
             </div>
-            <div className='grid  grid-cols-1 md:grid-cols-2 w-full md:w-1/2 mx-auto  items-center justify-center'>
-                {data.map((el, i) => <div className='flex flex-col gap-y-2 p-2' key={i}>
-                    <div className='flex flex-row gap-x-2 justify-center' >
-                        <Check check={selectedSpellings[i]} onChange={(b) => {
-                            let newSelections = [...selectedSpellings]
-                            newSelections[i] = b
-                            setSelectedSpellings(newSelections)
-                        }} />
-                        <div className='flex flex-row gap-x-3 justify-center'>
-                            {el.actualWord.split('').map((el, j) => <div className='w-2' key={j}>{el}</div>)}
-                        </div>
-                    </div>
-                    <div className='flex flex-row gap-x-3 justify-center'>
-                        <div className='opacity-0 text-md'>{i}</div>
-                        {el.actualWord.split('').map((a, j) => {
-                            let w = el.input[j] || ' '
-                            const cl = clsx({
-                                "border-red-500 text-red-500": el.input[j] !== a,
-                                "border-green-500 text-green-500": el.input[j] === a
-                            })
-                            return <div className={`border-b w-2 ${cl} whitespace-pre text-center `} key={j}>
-                                {w === ' ' ? <BsX width={2} className='text-center mx-auto' /> : w}
+            <div className=' grid grid-cols-1 md:grid-cols-2 gap-8 md:w-3/4 w-full mx-auto items-center justify-center '>
+                {data.map((el, i) => {
+                    const selectedSpellingStyle = clsx({
+                        'bg-gradient-to-r from-violet-500 to-pink-500': selectedSpellings[i]
+                    }
+                    )
+                    return <button onClick={() => {
+                        const prevSelectedSpellings = [...selectedSpellings]
+                        prevSelectedSpellings[i] = !prevSelectedSpellings[i]
+                        setSelectedSpellings(prevSelectedSpellings)
+                    }} className={`flex flex-col ${selectedSpellingStyle} p-0.5 `} key={i}>
+                        <div className='w-full h-full bg-zinc-800 p-6'>
+
+                            <div className='flex flex-col gap-y-3 items-start'>
+                                <div className='flex flex-row gap-x-1 items-center justify-center'>
+                                    {el.actualWord.split('').map((el, j) => <div className='w-8 mx-auto flex items-center justify-center' key={j}>{el}</div>)}
+                                </div>
+                                <div className='flex flex-row gap-x-1 items-center'>
+                                    {el.actualWord.split('').map((a, j) => {
+                                        let w = el.input[j] || ' '
+                                        const cl = clsx({
+                                            "border-red-500 text-red-500": el.input[j] !== a,
+                                            "border-green-500 text-green-500": el.input[j] === a
+                                        })
+                                        return <div className={`border-b w-8 mx-auto ${cl} whitespace-pre text-center `} key={j}>
+                                            {w === ' ' ? <BsX width={2} className='text-center mx-auto' /> : w}
+                                        </div>
+                                    })}
+                                </div>
                             </div>
-                        })}
-                    </div>
-                </div>)}
+                        </div>
+                    </button>
+                })
+
+                }
+
             </div>
             <div className='w-full md:w-1/2 mx-auto justify-between items-center flex my-12  text-md md:text-xl'>
                 <button onClick={() => {
@@ -159,7 +169,7 @@ const Result = () => {
                             newState.push({ done: false, input: '', word: spell.actualWord })
                         }
                     }
-                    setRes(newState, difficulty)
+                    setRes(newState, difficulty, false)
                     router.replace('/play')
                 }} className='transform will-change-transform hover:scale-125 transition-transform duration-200'>  Practice Incorrect  Words {`(${q})`} {">"} </button>}
 

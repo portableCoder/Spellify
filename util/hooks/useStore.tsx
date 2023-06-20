@@ -5,7 +5,8 @@ import getSpellings from '../getSpellings'
 type Store = {
     res: Spelling[],
     difficulty: Difficulty | '',
-    setRes: (spellings: Spelling[], difficulty: Difficulty | '') => void
+    setRes: (spellings: Spelling[], difficulty: Difficulty | '', isSaved: boolean) => void,
+    isSaved: boolean
 }
 let dummySpellingsRemoveThis = getSpellings('medium') as Spelling[]
 dummySpellingsRemoveThis = dummySpellingsRemoveThis.map((el) => {
@@ -18,10 +19,11 @@ dummySpellingsRemoveThis = dummySpellingsRemoveThis.map((el) => {
 const useStore = create<Store>()((set) => ({
     res: [],
     difficulty: '',
-    setRes(spellings, difficulty) {
+    isSaved: false,
+    setRes(spellings, difficulty, isSaved) {
 
         set(() => {
-            return { res: spellings, difficulty }
+            return { res: spellings, difficulty, isSaved }
         })
     }
 }))

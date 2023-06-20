@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import React, { useEffect, useRef, useState } from 'react'
 import Header from '../components/Header'
 import { NextPage } from 'next'
-import { BsPlayFill, BsStopFill } from 'react-icons/bs'
+import { BsChevronLeft, BsChevronRight, BsPlayFill, BsStopFill } from 'react-icons/bs'
 import { AnimateSharedLayout, motion } from 'framer-motion'
 import { Spelling } from '../types/Spellings'
 import getSpellings from '../util/getSpellings'
@@ -52,7 +52,7 @@ const Play = (props: NextPage) => {
 
     const { spellings, index } = state
     const { setRes, difficulty } = useStore()
-    const inputRefs = useRef<Array<HTMLDivElement | null>>([])
+    const inputRefs = useRef<Array<HTMLInputElement | null>>([])
     const [soundPlaying, setSoundPlaying] = useState(false)
     //stores current letter, character by character
     let [currentInput, setCurrentInput] = useState<string[]>([])
@@ -154,18 +154,30 @@ const Play = (props: NextPage) => {
                                         ref={ref => {
                                             inputRefs.current[i] = ref
                                         }}
-                                        layout key={i} value={currentInput[i] || ''} onChange={(e) => {
+                                        layout onKeyUp={(e) => {
+                                            if (e.key == 'Backspace') {
+                                                const inp = inputRefs.current[i]
+                                                if (inp) {
+                                                    if (inp.value === '' && currentInput[i] === '') {
+                                                        let prev = inputRefs.current[i - 1]
+                                                        if (prev) {
+                                                            prev.focus()
+                                                        }
+                                                    }
+                                                }
+
+                                            }
+                                        }} key={i} value={currentInput[i] || ''} onChange={(e) => {
+
                                             console.log('e,string', e.target.value)
                                             let r = inputRefs.current
                                             let c = [...currentInput]
-                                            c[i] = e.target.value[e.target.value.length - 1]
+                                            c[i] = e.target.value[0]
                                             if (c[i]) {
                                                 c[i] = c[i].toUpperCase()
                                             } else {
                                                 c[i] = ''
                                             }
-
-                                            setCurrentInput(c)
                                             if (r) {
                                                 if (r[i] && c[i] !== '') {
                                                     let nextInput = r[i + 1]
@@ -180,7 +192,7 @@ const Play = (props: NextPage) => {
                                                     }
                                                 }
                                             }
-
+                                            setCurrentInput(c)
 
 
                                         }} type='text' className={`border-2 border-white ${cl} focus:border-orange-500 uppercase  rounded-sm w-full md:w-16 md:h-12 text-center text-white p-2 focus:outline-none bg-transparent`} />
@@ -210,7 +222,8 @@ const Play = (props: NextPage) => {
                 {
                     buttonsVisible &&
                     <div className='md:w-1/2  w-full  mx-auto flex flex-row   my-20  justify-between text-xl md:text-3xl'>
-                        <motion.button
+                        {index == 0 && <div></div>}
+                        {index > 0 && <motion.button
                             animate={{
                                 opacity: index > 0 ? 1 : 0
                             }}
@@ -220,8 +233,8 @@ const Play = (props: NextPage) => {
                             }}
                             onClick={() => {
                                 setState((prev) => ({ ...prev, index: prev.index - 1 }))
-                            }} className='p-4 bg-gradient-to-br border from-orange-500 rounded-md to-purple-500'>Previous</motion.button>
-                        <button
+                            }} className='p-4 bg-gradient-to-br border from-orange-500 rounded-md to-purple-500'> <BsChevronLeft /> </motion.button>}
+                        {<button
 
                             onClick={() => {
                                 /*
@@ -242,7 +255,7 @@ const Play = (props: NextPage) => {
                                             newSpellings[index].input = currentInput.join("")
                                             let n = prev.index + 1
                                             if (!spellings[n]) {
-                                                setRes([...spellings], (router.query.difficulty) as Difficulty)
+                                                setRes([...spellings], (router.query.difficulty) as Difficulty, false)
                                                 router.replace('/result')
                                                 return { ...prev }
                                             }
@@ -254,7 +267,7 @@ const Play = (props: NextPage) => {
                                 } else {
                                     let n = index + 1
                                     if (!spellings[n]) {
-                                        setRes([...spellings], ((router.query.difficulty) || difficulty) as Difficulty)
+                                        setRes([...spellings], ((router.query.difficulty) || difficulty) as Difficulty, false)
                                         router.replace('/result')
                                     } else {
                                         setState((prev) => ({ ...prev, index: n }))
@@ -266,8 +279,8 @@ const Play = (props: NextPage) => {
                             }
                             className='p-4 rounded-md bg-gradient-to-br from-orange-500 to-purple-500'>
 
-                            {index === spellings.length - 1 ? "Finish" : "Next"}
-                        </button>
+                            {index === spellings.length - 1 ? 'Finish' : <BsChevronRight />}
+                        </button>}
 
                     </div>
                 }
