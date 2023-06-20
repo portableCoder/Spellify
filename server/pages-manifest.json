@@ -1,9 +1,9 @@
 {
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
-  "/previous-games": "pages/previous-games.html",
   "/": "pages/index.html",
   "/play": "pages/play.html",
+  "/previous-games": "pages/previous-games.html",
   "/result": "pages/result.html",
   "/_document": "pages/_document.js",
   "/404": "pages/404.html"
