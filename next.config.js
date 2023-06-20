@@ -4,6 +4,8 @@ const nextConfig = {
   swcMinify: true,
   output: 'export',
   basePath: '/Spellify',
+  assetPrefix: '/Spellify',
+  distDir: 'dist'
 }
 
 module.exports = nextConfig
